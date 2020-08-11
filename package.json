@@ -1,0 +1,192 @@
+{
+	"name": "pascal-language-server",
+	"displayName": "Pascal Language Server",
+	"description": "Pascal Langauge Server for Free Pascal Compiler",
+	"publisher": "ryan-joseph",
+	"categories": [
+		"Programming Languages"
+	],
+	"license": "MIT",
+	"version": "1.0.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/genericptr/pascal-language-server"
+	},
+	"homepage": "https://github.com/genericptr/pascal-language-server",
+	"engines": {
+		"vscode": "^1.43.0"
+	},
+	"activationEvents": [
+		"onLanguage:pascal"
+	],
+	"main": "./out/extension",
+	"contributes": {
+		"languages": [
+			{
+				"id": "pascal",
+				"extensions": [
+					".pas",
+					".pp",
+					".lpr",
+					".inc"
+				]
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Pascal Language Server",
+			"properties": {
+				"pascalLanguageServer.trace.server": {
+					"scope": "window",
+					"type": "string",
+					"enum": [
+						"off",
+						"messages",
+						"verbose"
+					],
+					"default": "off",
+					"description": "Traces the communication between VS Code and the language server."
+				},
+				"pascalLanguageServer.executable": {
+					"type": "string",
+					"default": "/usr/local/bin/pasls",
+					"description": "Path to the language server executable."
+				},
+
+				"pascalLanguageServer.initializationOptions.program": {
+					"type": "string",
+					"description": "Path to the main program file for resolving references (if not available the path of the current document will be used)"
+				},
+				"pascalLanguageServer.initializationOptions.symbolDatabase": {
+					"type": "string",
+					"description": "Path to SQLite3 database for symbols"
+				},
+				"pascalLanguageServer.initializationOptions.fpcOptions": {
+					"type": "array",
+					"default": [
+						"-Fu/path/to/units"
+					],
+					"markdownDescription": "Compiler switches to specify additional information (such as `-Fu`, `-Fi`, `-d`)"
+				},
+				"pascalLanguageServer.initializationOptions.overloadPolicy": {
+					"type": "number",
+					"scope": "application",
+					"default": 3,
+					"enum": [
+						1,
+						2,
+						3
+					],
+					"enumDescriptions": [
+						"Duplicate function names appear in the list",
+						"After the original definition ignore others",
+						"Add a suffix which denotes the overload count"
+					],
+					"description": "Policy which determines how overloaded document symbols are displayed"
+				},
+				"pascalLanguageServer.initializationOptions.maximumCompletions": {
+					"type": "number",
+					"scope": "application",
+					"default": 100,
+					"markdownDescription": "Maximum number of completion items to be returned. If the threshold is reached then `CompletionList.isIncomplete = true`"
+				},
+				"pascalLanguageServer.initializationOptions.options.insertCompletionsAsSnippets": {
+					"type": "boolean",
+					"scope": "application",
+					"default": true,
+					"description": "Procedure completions with parameters are inserted as snippets"
+				},
+				"pascalLanguageServer.initializationOptions.options.insertCompletionProcedureBrackets": {
+					"type": "boolean",
+					"default": false,
+					"description": "Procedure completions with parameters (non-snippet) insert empty brackets (and insert as snippet)"
+				},
+				"pascalLanguageServer.initializationOptions.options.includeWorkspaceFoldersAsUnitPaths": {
+					"type": "boolean",
+					"default": true,
+					"description": "Workspaces folders will be added to unit paths (i.e. -Fu)"
+				},
+				"pascalLanguageServer.initializationOptions.options.includeWorkspaceFoldersAsIncludePaths": {
+					"type": "boolean",
+					"scope": "application",
+					"default": true,
+					"description": "Workspaces folders will be added to include paths (i.e. -Fi)"
+				},
+				"pascalLanguageServer.initializationOptions.options.checkSyntax": {
+					"type": "boolean",
+					"scope": "application",
+					"default": false,
+					"description": "Syntax will be checked when file opens or saves"
+				},
+				"pascalLanguageServer.initializationOptions.options.publishDiagnostics": {
+					"type": "boolean",
+					"scope": "application",
+					"default": false,
+					"description": "Syntax errors will be published as diagnostics"
+				},
+				"pascalLanguageServer.initializationOptions.options.workspaceSymbols": {
+					"type": "boolean",
+					"default": false,
+					"description": "Enable workspace symbols"
+				},
+				"pascalLanguageServer.initializationOptions.options.documentSymbols": {
+					"type": "boolean",
+					"scope": "application",
+					"default": true,
+					"description": "Enable document symbols"
+				},
+				"pascalLanguageServer.initializationOptions.options.minimalisticCompletions": {
+					"type": "boolean",
+					"scope": "application",
+					"default": false,
+					"description": "Completions contain a minimal amount of extra information"
+				},
+				"pascalLanguageServer.initializationOptions.options.showSyntaxErrors": {
+					"type": "boolean",
+					"scope": "application",
+					"default": true,
+					"markdownDescription": "Syntax errors as shown in the UI with ‘window/showMessage’"
+				},
+				"pascalLanguageServer.env.PP": {
+					"type": "string",
+					"markdownDescription": "Path to compiler (i.e. `/usr/bin/fpc`, `/usr/bin/ppc386`)"
+				},
+				"pascalLanguageServer.env.FPCDIR": {
+					"type": "string",
+					"default": "/usr/local/share/fpcsrc",
+					"markdownDescription": "Path to FPC sources such as `/usr/local/share/fpcsrc`"
+				},
+				"pascalLanguageServer.env.LAZARUSDIR": {
+					"type": "string",
+					"markdownDescription": "Path to Lazarus sources as `/usr/local/share/lazsrc`"
+				},
+				"pascalLanguageServer.env.FPCTARGET": {
+					"type": "string",
+					"markdownDescription": "Target platform (`windows`, `linux`, `darwin`)"
+				},
+				"pascalLanguageServer.env.FPCTARGETCPU": {
+					"type": "string",
+					"markdownDescription": "Target CPU such as `x86_64`"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -b",
+		"watch": "tsc -b -w"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^6.1.3"
+	},
+	"devDependencies": {
+		"@types/vscode": "1.43.0",
+		"@types/mocha": "^5.2.7",
+		"vscode-test": "^1.3.0",
+		"mocha": "^6.2.2",
+		"@types/node": "^12.12.0",
+		"eslint": "^6.4.0",
+		"@typescript-eslint/parser": "^2.3.0",
+		"typescript": "^3.9.4"
+	}
+}
