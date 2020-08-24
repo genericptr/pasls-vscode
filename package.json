@@ -90,58 +90,58 @@
 					"default": 100,
 					"markdownDescription": "Maximum number of completion items to be returned. If the threshold is reached then `CompletionList.isIncomplete = true`"
 				},
-				"pascalLanguageServer.initializationOptions.options.insertCompletionsAsSnippets": {
+				"pascalLanguageServer.initializationOptions.insertCompletionsAsSnippets": {
 					"type": "boolean",
 					"scope": "application",
 					"default": true,
 					"description": "Procedure completions with parameters are inserted as snippets"
 				},
-				"pascalLanguageServer.initializationOptions.options.insertCompletionProcedureBrackets": {
+				"pascalLanguageServer.initializationOptions.insertCompletionProcedureBrackets": {
 					"type": "boolean",
 					"default": false,
 					"description": "Procedure completions with parameters (non-snippet) insert empty brackets (and insert as snippet)"
 				},
-				"pascalLanguageServer.initializationOptions.options.includeWorkspaceFoldersAsUnitPaths": {
+				"pascalLanguageServer.initializationOptions.includeWorkspaceFoldersAsUnitPaths": {
 					"type": "boolean",
 					"default": true,
 					"description": "Workspaces folders will be added to unit paths (i.e. -Fu)"
 				},
-				"pascalLanguageServer.initializationOptions.options.includeWorkspaceFoldersAsIncludePaths": {
+				"pascalLanguageServer.initializationOptions.includeWorkspaceFoldersAsIncludePaths": {
 					"type": "boolean",
 					"scope": "application",
 					"default": true,
 					"description": "Workspaces folders will be added to include paths (i.e. -Fi)"
 				},
-				"pascalLanguageServer.initializationOptions.options.checkSyntax": {
+				"pascalLanguageServer.initializationOptions.checkSyntax": {
 					"type": "boolean",
 					"scope": "application",
 					"default": false,
 					"description": "Syntax will be checked when file opens or saves"
 				},
-				"pascalLanguageServer.initializationOptions.options.publishDiagnostics": {
+				"pascalLanguageServer.initializationOptions.publishDiagnostics": {
 					"type": "boolean",
 					"scope": "application",
 					"default": false,
 					"description": "Syntax errors will be published as diagnostics"
 				},
-				"pascalLanguageServer.initializationOptions.options.workspaceSymbols": {
+				"pascalLanguageServer.initializationOptions.workspaceSymbols": {
 					"type": "boolean",
 					"default": false,
 					"description": "Enable workspace symbols"
 				},
-				"pascalLanguageServer.initializationOptions.options.documentSymbols": {
+				"pascalLanguageServer.initializationOptions.documentSymbols": {
 					"type": "boolean",
 					"scope": "application",
 					"default": true,
 					"description": "Enable document symbols"
 				},
-				"pascalLanguageServer.initializationOptions.options.minimalisticCompletions": {
+				"pascalLanguageServer.initializationOptions.minimalisticCompletions": {
 					"type": "boolean",
 					"scope": "application",
 					"default": false,
 					"description": "Completions contain a minimal amount of extra information"
 				},
-				"pascalLanguageServer.initializationOptions.options.showSyntaxErrors": {
+				"pascalLanguageServer.initializationOptions.showSyntaxErrors": {
 					"type": "boolean",
 					"scope": "application",
 					"default": true,
