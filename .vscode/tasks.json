@@ -4,7 +4,10 @@
 		{
 			"type": "npm",
 			"script": "compile",
-			"group": "build",
+			"group": { 
+				"kind" :"build",
+				"isDefault": true
+		  },		
 			"presentation": {
 				"panel": "dedicated",
 				"reveal": "never"
@@ -18,8 +21,7 @@
 			"script": "watch",
 			"isBackground": true,
 			"group": {
-				"kind": "build",
-				"isDefault": true
+				"kind": "build"
 			},
 			"presentation": {
 				"panel": "dedicated",
