@@ -3,135 +3,157 @@
 // import * as path from 'path';
 // import * as fs from 'fs';
 
-import { 
+import {
 	TextDocument,
-	Range, 
-	CodeAction, 
-	CodeActionProvider, 
-	CodeActionKind, 
-  window,
-	commands, 
-	workspace, 
-	ExtensionContext, 
-	WorkspaceFolder, 
+	TextEdit,
+	Position,
+	Range,
+	CodeAction,
+	CodeActionProvider,
+	CodeActionKind,
+	window,
+	commands,
+	workspace,
+	ExtensionContext,
+	WorkspaceFolder,
 	languages,
-	Uri, 
-	Command} from 'vscode';
+	Uri,
+	Command
+} from 'vscode';
 import {
 	Executable,
 	LanguageClient,
 	LanguageClientOptions,
 	ServerOptions
 } from 'vscode-languageclient';
+import * as fs from 'fs';
 
 const
-  CompleteCommand = 'pasls.completeCode';
-const 
-  InvokeCompleteCommand = 'invoke.codeCompletion';
+	CompleteCommand = 'pasls.completeCode';
+const
+	InvokeCompleteCommand = 'invoke.codeCompletion';
+const
+	FormatCommand = 'pasls.formatCode';
+const
+	InvokeFormatCommand = 'invoke.formatCode';
 
 let client: LanguageClient;
-let completecmd : Command;
+let completecmd: Command;
 
-function CallCodeCompletion(document:TextDocument, location : Range) : any {
-  
-}
+function invokeFormat(document: TextDocument, range: Range) {
+	let activeEditor = window.activeTextEditor;
+	if (!activeEditor) {
+		window.showErrorMessage('No active editor.')
+		return;
+	}
 
-export class CodeCompleter implements CodeActionProvider {
+	// Do we have a document ?
+	let doc = document ? document : (activeEditor ? activeEditor.document : undefined);
+	if (!doc) {
+		window.showErrorMessage('No document available.')
+		return;
+	}
+	let fn: string = doc ? doc.uri.fsPath : '';
+	if (!fn) {
+		window.showErrorMessage('Documents needs to be saved first.')
+		return;
+	}
+	// Maybe check for extensions ? 
+	if (doc.isDirty) doc.save();
 
-	public static readonly providedCodeActionKinds = [
-		CodeActionKind.RefactorRewrite
-	];
+	let formatConfig: string = workspace.getConfiguration('pascalLanguageServer').get('formatConfig') || '';
+	if (formatConfig) {
+		formatConfig = 'file://' + formatConfig;
+		if (!fs.existsSync(formatConfig)) {
+			window.showErrorMessage('Formatter config file does not exist: ' + formatConfig);
+			return;
+		}
+	}
 
-	public provideCodeActions(document: TextDocument, range: Range): CodeAction[] | undefined {
-		
-		const completeAction = this.createCommand(document,range);
-
-		return [
-			completeAction
-		];
-	}	
-
-	private createCommand(document: TextDocument, range: Range): CodeAction {
-		const action = new CodeAction('Complete code...', CodeActionKind.RefactorRewrite);
-		action.command = { 
-			command: CompleteCommand, 
-			title: 'Code completion', 
-			tooltip: 'Try to complete the code at the current location.' ,
-			arguments: [document.uri.with({"scheme":"file"}).toString(),range.start]
-		};
-		action.isPreferred = true;
-		return action;
+	if (doc.uri) {
+		commands.executeCommand(FormatCommand, doc.uri.with({ "scheme": "file" }).toString(), formatConfig);
 	}
 }
 
 
+
 export function activate(context: ExtensionContext) {
-		console.log("Greetings from pascal-language-server 🙏");
+	console.log("Greetings from pascal-language-server 🙏");
 
-		// Load the path to the language server from settings
-		let executable: string = workspace.getConfiguration('pascalLanguageServer').get("executable");
-	
-		// TODO: download the executable for the active platform
-		// https://github.com/genericptr/pascal-language-server/releases/download/x86_64-darwin/pasls
-		// if (!executable) {
-		// 	let target = 'x86_64-darwin';
-		// 	executable = context.asAbsolutePath(path.join('bin', target, 'pasls'));
-		// }
+	// Load the path to the language server from settings
+	let executable: string = workspace.getConfiguration('pascalLanguageServer').get("executable");
 
-		console.log("executable: "+executable);
+	// TODO: download the executable for the active platform
+	// https://github.com/genericptr/pascal-language-server/releases/download/x86_64-darwin/pasls
+	// if (!executable) {
+	// 	let target = 'x86_64-darwin';
+	// 	executable = context.asAbsolutePath(path.join('bin', target, 'pasls'));
+	// }
 
-		// load environment variables from settings which are used for CodeTools
-		let userEnvironmentVariables = {};
-		let keys: string[] = ['PP', 'FPCDIR', 'LAZARUSDIR', 'FPCTARGET', 'FPCTARGETCPU'];
-		let settingEnvironmentVariables = workspace.getConfiguration('pascalLanguageServer.env');
+	console.log("executable: " + executable);
 
-		Object.keys(settingEnvironmentVariables).forEach(key => {
-			if (keys.includes(key)) {
-				if (settingEnvironmentVariables[key]) userEnvironmentVariables[key] = settingEnvironmentVariables[key];
-			}
-		});
-		
+	// load environment variables from settings which are used for CodeTools
+	let userEnvironmentVariables = {};
+	let keys: string[] = ['PP', 'FPCDIR', 'LAZARUSDIR', 'FPCTARGET', 'FPCTARGETCPU'];
+	let settingEnvironmentVariables = workspace.getConfiguration('pascalLanguageServer.env');
 
-		let run: Executable = { command: executable,
-														options: {
-															env: userEnvironmentVariables
-														}
-													};
-    let debug: Executable = run;
-    let serverOptions: ServerOptions = {
-        run: run,
-        debug: debug
-		};
-		
-		let initializationOptions = workspace.getConfiguration('pascalLanguageServer.initializationOptions');
-		// console.log(initializationOptions);
-
-    // client extensions configure their server
-    let clientOptions: LanguageClientOptions = {
-			initializationOptions: initializationOptions,
-			// workspaceFolder: folder,
-			documentSelector: [
-				{ scheme: 'file', language: 'pascal' },
-				{ scheme: 'untitled', language: 'pascal' }
-			]
+	Object.keys(settingEnvironmentVariables).forEach(key => {
+		if (keys.includes(key)) {
+			if (settingEnvironmentVariables[key]) userEnvironmentVariables[key] = settingEnvironmentVariables[key];
 		}
+	});
 
-		client = new LanguageClient('pascal-language-server', 'Pascal Language Server', serverOptions, clientOptions);
-		client.start();
 
-		languages.registerCodeActionsProvider('pascal', new CodeCompleter(), {
-	    providedCodeActionKinds: CodeCompleter.providedCodeActionKinds
-		});
+	let run: Executable = {
+		command: executable,
+		options: {
+			env: userEnvironmentVariables
+		}
+	};
+	let debug: Executable = run;
+	let serverOptions: ServerOptions = {
+		run: run,
+		debug: debug
+	};
 
-	 	const completecmd = commands.registerCommand(InvokeCompleteCommand, (document,range) => {
-  	  let activeEditor = window.activeTextEditor;
-		  let curPos = activeEditor.selection.active;
-			let doc = document ? document : activeEditor.document;
-			let rng = range ? range : new Range(curPos,curPos);
-			commands.executeCommand(CompleteCommand,doc.uri.with({"scheme":"file"}).toString(),rng.start);
-		});
-	
-		context.subscriptions.push(completecmd);		
+	let initializationOptions = workspace.getConfiguration('pascalLanguageServer.initializationOptions');
+
+	// console.log(initializationOptions);
+
+	// client extensions configure their server
+	let clientOptions: LanguageClientOptions = {
+		initializationOptions: initializationOptions,
+		// workspaceFolder: folder,
+		documentSelector: [
+			{ scheme: 'file', language: 'pascal' },
+			{ scheme: 'untitled', language: 'pascal' }
+		]
+	}
+
+	client = new LanguageClient('pascal-language-server', 'Pascal Language Server', serverOptions, clientOptions);
+	client.start();
+
+
+	languages.registerDocumentFormattingEditProvider('pascal', {
+		provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
+			invokeFormat(document,new Range(new Position(0,0), new Position(document.lineCount,0)));
+			return [];
+		}
+	});	
+	const completecmd = commands.registerCommand(InvokeCompleteCommand, (document, range) => {
+		let activeEditor = window.activeTextEditor;
+		let curPos = activeEditor.selection.active;
+		let doc = document ? document : activeEditor.document;
+		let rng = range ? range : new Range(curPos, curPos);
+		if (doc.uri && rng) {
+			commands.executeCommand(CompleteCommand, doc.uri.with({ "scheme": "file" }).toString(), rng.start);
+		}
+	});
+
+	context.subscriptions.push(completecmd);
+	const formatcmd = commands.registerCommand(InvokeFormatCommand, invokeFormat)
+
+	context.subscriptions.push(formatcmd);
 }
 
 export function deactivate(): Thenable<void> | undefined {

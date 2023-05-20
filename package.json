@@ -7,7 +7,7 @@
 		"Programming Languages"
 	],
 	"license": "MIT",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/genericptr/pascal-language-server"
@@ -36,6 +36,10 @@
 			{
         "command" : "invoke.codeCompletion",
 				"title" : "Complete the code at the cursor"
+		  },
+			{
+        "command" : "invoke.formatCode",
+				"title" : "Complete the code at the cursor"
 		  }
 	  ],
 		"keybindings": [
@@ -43,6 +47,7 @@
 					"command": "invoke.codeCompletion",
 					"key": "ctrl+shift+c"
 			}
+			
 	  ],  		
 		"configuration": {
 			"type": "object",
