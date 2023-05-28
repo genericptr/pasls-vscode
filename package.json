@@ -40,6 +40,10 @@
 			{
         "command" : "invoke.formatCode",
 				"title" : "Complete the code at the cursor"
+		  },
+			{
+        "command" : "invoke.invertAssignment",
+				"title" : "Invert the assignment statements in the selection"
 		  }
 	  ],
 		"keybindings": [
@@ -69,7 +73,6 @@
 					"default": "/usr/local/bin/pasls",
 					"description": "Path to the language server executable."
 				},
-
 				"pascalLanguageServer.initializationOptions.program": {
 					"type": "string",
 					"description": "Path to the main program file for resolving references (if not available the path of the current document will be used)"

@@ -28,14 +28,14 @@ import {
 } from 'vscode-languageclient';
 import * as fs from 'fs';
 
-const
-	CompleteCommand = 'pasls.completeCode';
-const
-	InvokeCompleteCommand = 'invoke.codeCompletion';
-const
-	FormatCommand = 'pasls.formatCode';
-const
-	InvokeFormatCommand = 'invoke.formatCode';
+
+const CompleteCommand = 'pasls.completeCode';
+const InvokeCompleteCommand = 'invoke.codeCompletion';
+const FormatCommand = 'pasls.formatCode';
+const InvokeFormatCommand = 'invoke.formatCode';
+const InvertAssignmentCommand = 'pasls.invertAssignment';
+const InvokeInvertAssignmentCommand = 'invoke.invertAssignment';
+
 
 let client: LanguageClient;
 let completecmd: Command;
@@ -72,6 +72,26 @@ function invokeFormat(document: TextDocument, range: Range) {
 
 	if (doc.uri) {
 		commands.executeCommand(FormatCommand, doc.uri.with({ "scheme": "file" }).toString(), formatConfig);
+	}
+}
+
+function invokeInvertAssignment(document: TextDocument, range: Range) {
+	// Do we have a document ?
+	let activeEditor = window.activeTextEditor;
+	if (!activeEditor) {
+		return;
+	}
+	let sPos = activeEditor.selection.start;
+	let ePos = activeEditor.selection.end;
+	let doc : TextDocument = document ? document : activeEditor.document;
+	
+	if (!doc) {
+		window.showErrorMessage('No document available.')
+		return;
+	}
+	
+	if (doc.uri) {
+		commands.executeCommand(InvertAssignmentCommand, doc.uri.with({ "scheme": "file" }).toString(), sPos, ePos);
 	}
 }
 
@@ -154,6 +174,19 @@ export function activate(context: ExtensionContext) {
 	const formatcmd = commands.registerCommand(InvokeFormatCommand, invokeFormat)
 
 	context.subscriptions.push(formatcmd);
+
+	languages.registerDocumentFormattingEditProvider('pascal', {
+		provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
+			invokeFormat(document,new Range(new Position(0,0), new Position(document.lineCount,0)));
+			return [];
+		}
+	});	
+
+	const invertassignmentcmd = commands.registerCommand(InvokeInvertAssignmentCommand, invokeInvertAssignment)
+
+	context.subscriptions.push(invertassignmentcmd);
+
+
 }
 
 export function deactivate(): Thenable<void> | undefined {
