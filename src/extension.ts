@@ -28,14 +28,13 @@ import {
 } from 'vscode-languageclient';
 import * as fs from 'fs';
 
-const
-	CompleteCommand = 'pasls.completeCode';
-const
-	InvokeCompleteCommand = 'invoke.codeCompletion';
-const
-	FormatCommand = 'pasls.formatCode';
-const
-	InvokeFormatCommand = 'invoke.formatCode';
+
+const CompleteCommand = 'pasls.completeCode';
+const InvokeCompleteCommand = 'invoke.codeCompletion';
+const FormatCommand = 'pasls.formatCode';
+const InvokeFormatCommand = 'invoke.formatCode';
+const RemoveEmptyMethodsCommand = 'pasls.removeEmptyMethods'; 
+const InvokeRemoveEmptyMethodsCommand = 'invoke.removeEmptyMethods'; 
 
 let client: LanguageClient;
 let completecmd: Command;
@@ -72,6 +71,26 @@ function invokeFormat(document: TextDocument, range: Range) {
 
 	if (doc.uri) {
 		commands.executeCommand(FormatCommand, doc.uri.with({ "scheme": "file" }).toString(), formatConfig);
+	}
+}
+
+function invokeRemoveEmptyMethods() {
+	// Do we have a document ?
+	let activeEditor = window.activeTextEditor;
+	if (!activeEditor) {
+		return;
+	}
+	
+	let doc : TextDocument = activeEditor.document;
+	if (!doc) {
+		window.showErrorMessage('No document available.')
+		return;
+	}
+
+	let pos : Position = activeEditor.selection.start;
+	
+	if (doc.uri) {
+		commands.executeCommand(RemoveEmptyMethodsCommand, doc.uri.with({ "scheme": "file" }).toString(), pos);
 	}
 }
 
@@ -154,6 +173,12 @@ export function activate(context: ExtensionContext) {
 	const formatcmd = commands.registerCommand(InvokeFormatCommand, invokeFormat)
 
 	context.subscriptions.push(formatcmd);
+
+	const removeemptymethodscmd = commands.registerCommand(InvokeRemoveEmptyMethodsCommand, invokeRemoveEmptyMethods)
+
+	context.subscriptions.push(removeemptymethodscmd);
+
+
 }
 
 export function deactivate(): Thenable<void> | undefined {

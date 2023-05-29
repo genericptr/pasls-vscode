@@ -40,6 +40,10 @@
 			{
         "command" : "invoke.formatCode",
 				"title" : "Complete the code at the cursor"
+		  },
+			{
+        "command" : "invoke.removeEmptyMethods",
+				"title" : "Remove empty methods from classes in this file"
 		  }
 	  ],
 		"keybindings": [
