@@ -36,6 +36,7 @@ const InvokeFormatCommand = 'invoke.formatCode';
 
 const InvertAssignmentCommand = 'pasls.invertAssignment';
 const InvokeInvertAssignmentCommand = 'invoke.invertAssignment';
+
 const RemoveEmptyMethodsCommand = 'pasls.removeEmptyMethods'; 
 const InvokeRemoveEmptyMethodsCommand = 'invoke.removeEmptyMethods'; 
 
@@ -77,6 +78,26 @@ function invokeFormat(document: TextDocument, range: Range) {
 	}
 }
 
+function invokeRemoveEmptyMethods() {
+	// Do we have a document ?
+	let activeEditor = window.activeTextEditor;
+	if (!activeEditor) {
+		return;
+	}
+	
+	let doc : TextDocument = activeEditor.document;
+	if (!doc) {
+		window.showErrorMessage('No document available.')
+		return;
+	}
+
+	let pos : Position = activeEditor.selection.start;
+	
+	if (doc.uri) {
+		commands.executeCommand(RemoveEmptyMethodsCommand, doc.uri.with({ "scheme": "file" }).toString(), pos);
+	}
+}
+
 
 function invokeInvertAssignment(document: TextDocument, range: Range) {
 	// Do we have a document ?
@@ -98,20 +119,6 @@ function invokeInvertAssignment(document: TextDocument, range: Range) {
 	}	
 }
 
-function invokeRemoveEmptyMethods() {
-	// Do we have a document ?
-	let activeEditor = window.activeTextEditor;
-	if (!activeEditor) {
-		return;
-	}
-	
-	let doc : TextDocument = activeEditor.document;
-	let pos : Position = activeEditor.selection.start;
-	
-	if (doc.uri) {
-		commands.executeCommand(RemoveEmptyMethodsCommand, doc.uri.with({ "scheme": "file" }).toString(), pos);
-	}
-}
 
 
 
@@ -184,7 +191,7 @@ export function activate(context: ExtensionContext) {
 
 	context.subscriptions.push(completecmd);
 
-  /* Register formatting provider registration*/
+        /* Register formatting provider registration*/
 
 	languages.registerDocumentFormattingEditProvider('pascal', {
 		provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
@@ -205,7 +212,7 @@ export function activate(context: ExtensionContext) {
 
 	context.subscriptions.push(invertassignmentcmd);
 
-  /* Remove empty methods command */
+       /* Remove empty methods command */
 
 	const removeemptymethodscmd = commands.registerCommand(InvokeRemoveEmptyMethodsCommand, invokeRemoveEmptyMethods)
 
