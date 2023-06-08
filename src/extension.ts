@@ -171,13 +171,7 @@ export function activate(context: ExtensionContext) {
 	client = new LanguageClient('pascal-language-server', 'Pascal Language Server', serverOptions, clientOptions);
 	client.start();
 
-
-	languages.registerDocumentFormattingEditProvider('pascal', {
-		provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
-			invokeFormat(document,new Range(new Position(0,0), new Position(document.lineCount,0)));
-			return [];
-		}
-	});	
+	/* Completion command  */
 	const completecmd = commands.registerCommand(InvokeCompleteCommand, (document, range) => {
 		let activeEditor = window.activeTextEditor;
 		let curPos = activeEditor.selection.active;
@@ -189,10 +183,8 @@ export function activate(context: ExtensionContext) {
 	});
 
 	context.subscriptions.push(completecmd);
-	const formatcmd = commands.registerCommand(InvokeFormatCommand, invokeFormat)
 
-	context.subscriptions.push(formatcmd);
-<<<<<<< HEAD
+  /* Register formatting provider registration*/
 
 	languages.registerDocumentFormattingEditProvider('pascal', {
 		provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
@@ -201,15 +193,23 @@ export function activate(context: ExtensionContext) {
 		}
 	});	
 
+	/* Format Code  command  */
+	
+	const formatcmd = commands.registerCommand(InvokeFormatCommand, invokeFormat)
+
+	context.subscriptions.push(formatcmd);
+
+	/* Invert assignment command  */
+
 	const invertassignmentcmd = commands.registerCommand(InvokeInvertAssignmentCommand, invokeInvertAssignment)
 
 	context.subscriptions.push(invertassignmentcmd);
-=======
+
+  /* Remove empty methods command */
 
 	const removeemptymethodscmd = commands.registerCommand(InvokeRemoveEmptyMethodsCommand, invokeRemoveEmptyMethods)
 
 	context.subscriptions.push(removeemptymethodscmd);
->>>>>>> * Remove empty methods command
 
 
 }
