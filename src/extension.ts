@@ -28,14 +28,17 @@ import {
 } from 'vscode-languageclient';
 import * as fs from 'fs';
 
-
 const CompleteCommand = 'pasls.completeCode';
 const InvokeCompleteCommand = 'invoke.codeCompletion';
+
 const FormatCommand = 'pasls.formatCode';
 const InvokeFormatCommand = 'invoke.formatCode';
+
 const InvertAssignmentCommand = 'pasls.invertAssignment';
 const InvokeInvertAssignmentCommand = 'invoke.invertAssignment';
 
+const RemoveEmptyMethodsCommand = 'pasls.removeEmptyMethods'; 
+const InvokeRemoveEmptyMethodsCommand = 'invoke.removeEmptyMethods'; 
 
 let client: LanguageClient;
 let completecmd: Command;
@@ -75,6 +78,27 @@ function invokeFormat(document: TextDocument, range: Range) {
 	}
 }
 
+function invokeRemoveEmptyMethods() {
+	// Do we have a document ?
+	let activeEditor = window.activeTextEditor;
+	if (!activeEditor) {
+		return;
+	}
+	
+	let doc : TextDocument = activeEditor.document;
+	if (!doc) {
+		window.showErrorMessage('No document available.')
+		return;
+	}
+
+	let pos : Position = activeEditor.selection.start;
+	
+	if (doc.uri) {
+		commands.executeCommand(RemoveEmptyMethodsCommand, doc.uri.with({ "scheme": "file" }).toString(), pos);
+	}
+}
+
+
 function invokeInvertAssignment(document: TextDocument, range: Range) {
 	// Do we have a document ?
 	let activeEditor = window.activeTextEditor;
@@ -84,7 +108,7 @@ function invokeInvertAssignment(document: TextDocument, range: Range) {
 	let sPos = activeEditor.selection.start;
 	let ePos = activeEditor.selection.end;
 	let doc : TextDocument = document ? document : activeEditor.document;
-	
+
 	if (!doc) {
 		window.showErrorMessage('No document available.')
 		return;
@@ -92,8 +116,9 @@ function invokeInvertAssignment(document: TextDocument, range: Range) {
 	
 	if (doc.uri) {
 		commands.executeCommand(InvertAssignmentCommand, doc.uri.with({ "scheme": "file" }).toString(), sPos, ePos);
-	}
+	}	
 }
+
 
 
 
@@ -153,13 +178,7 @@ export function activate(context: ExtensionContext) {
 	client = new LanguageClient('pascal-language-server', 'Pascal Language Server', serverOptions, clientOptions);
 	client.start();
 
-
-	languages.registerDocumentFormattingEditProvider('pascal', {
-		provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
-			invokeFormat(document,new Range(new Position(0,0), new Position(document.lineCount,0)));
-			return [];
-		}
-	});	
+	/* Completion command  */
 	const completecmd = commands.registerCommand(InvokeCompleteCommand, (document, range) => {
 		let activeEditor = window.activeTextEditor;
 		let curPos = activeEditor.selection.active;
@@ -171,9 +190,8 @@ export function activate(context: ExtensionContext) {
 	});
 
 	context.subscriptions.push(completecmd);
-	const formatcmd = commands.registerCommand(InvokeFormatCommand, invokeFormat)
 
-	context.subscriptions.push(formatcmd);
+        /* Register formatting provider registration*/
 
 	languages.registerDocumentFormattingEditProvider('pascal', {
 		provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
@@ -182,9 +200,23 @@ export function activate(context: ExtensionContext) {
 		}
 	});	
 
+	/* Format Code  command  */
+	
+	const formatcmd = commands.registerCommand(InvokeFormatCommand, invokeFormat)
+
+	context.subscriptions.push(formatcmd);
+
+	/* Invert assignment command  */
+
 	const invertassignmentcmd = commands.registerCommand(InvokeInvertAssignmentCommand, invokeInvertAssignment)
 
 	context.subscriptions.push(invertassignmentcmd);
+
+       /* Remove empty methods command */
+
+	const removeemptymethodscmd = commands.registerCommand(InvokeRemoveEmptyMethodsCommand, invokeRemoveEmptyMethods)
+
+	context.subscriptions.push(removeemptymethodscmd);
 
 
 }
