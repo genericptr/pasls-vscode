@@ -6,6 +6,7 @@
 import {
 	TextDocument,
 	TextEdit,
+	TextEditor,
 	Position,
 	Range,
 	CodeAction,
@@ -18,15 +19,24 @@ import {
 	WorkspaceFolder,
 	languages,
 	Uri,
-	Command
+	Command,
+	TextEditorDecorationType,
+	DecorationRangeBehavior,
+	
 } from 'vscode';
 import {
 	Executable,
 	LanguageClient,
 	LanguageClientOptions,
-	ServerOptions
+	ServerOptions,
+	NotificationType
 } from 'vscode-languageclient';
 import * as fs from 'fs';
+import { 
+	InputRegion ,
+	DecorationRangesPair,
+   InactiveRegionParams
+} from './servermessages';
 
 const CompleteCommand = 'pasls.completeCode';
 const InvokeCompleteCommand = 'invoke.codeCompletion';
@@ -40,9 +50,13 @@ const InvokeInvertAssignmentCommand = 'invoke.invertAssignment';
 const RemoveEmptyMethodsCommand = 'pasls.removeEmptyMethods'; 
 const InvokeRemoveEmptyMethodsCommand = 'invoke.removeEmptyMethods'; 
 
+// const InactiveRegionNotification = 'pasls.inactiveRegions';
+const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('pasls.inactiveRegions');
+
 let client: LanguageClient;
 let completecmd: Command;
-
+let inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
+    
 function invokeFormat(document: TextDocument, range: Range) {
 	let activeEditor = window.activeTextEditor;
 	if (!activeEditor) {
@@ -119,6 +133,57 @@ function invokeInvertAssignment(document: TextDocument, range: Range) {
 	}	
 }
 
+function setInactiveRegion(params: InactiveRegionParams) {
+
+	//const settings: CppSettings = new CppSettings(this.RootUri);
+	const opacity: number | undefined = 0.3;//settings.inactiveRegionOpacity;
+	if (opacity !== null && opacity !== undefined) {
+			let backgroundColor: string | undefined = "";//settings.inactiveRegionBackgroundColor;
+			if (backgroundColor === "") {
+					backgroundColor = undefined;
+			}
+			let color: string | undefined = "";//settings.inactiveRegionForegroundColor;
+			if (color === "") {
+					color = undefined;
+			}
+			const decoration: TextEditorDecorationType = window.createTextEditorDecorationType({
+					opacity: opacity.toString(),
+					backgroundColor: backgroundColor,
+					color: color,
+					rangeBehavior: DecorationRangeBehavior.OpenOpen
+			});
+			// We must convert to vscode.Ranges in order to make use of the API's
+			const ranges: Range[] = [];
+			params.regions.forEach(element => {
+					const newRange: Range = new Range(element.startLine-1, element.startCol-1, element.endLine-1, element.endCol-1);
+					ranges.push(newRange);
+			});
+			// Find entry for cached file and act accordingly
+			const valuePair: DecorationRangesPair | undefined = inactiveRegionsDecorations.get(params.uri);
+			if (valuePair) {
+					// Disposing of and resetting the decoration will undo previously applied text decorations
+					valuePair.decoration.dispose();
+					valuePair.decoration = decoration;
+					// As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
+					valuePair.ranges = ranges;
+			} else { // The entry does not exist. Make a new one
+					const toInsert: DecorationRangesPair = {
+							decoration: decoration,
+							ranges: ranges
+					};
+					inactiveRegionsDecorations.set(params.uri, toInsert);
+			}
+			//if (settings.dimInactiveRegions && params.fileVersion === openFileVersions.get(params.uri)) {
+			// Apply the decorations to all *visible* text editors
+			const editors: TextEditor[] = window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
+			for (const e of editors) {
+					e.setDecorations(decoration, ranges);
+			}
+			//}
+	}
+
+};
+
 
 
 
@@ -177,6 +242,9 @@ export function activate(context: ExtensionContext) {
 
 	client = new LanguageClient('pascal-language-server', 'Pascal Language Server', serverOptions, clientOptions);
 	client.start();
+	client.onReady().then(function() {
+		client.onNotification(InactiveRegionNotification,setInactiveRegion);
+  });
 
 	/* Completion command  */
 	const completecmd = commands.registerCommand(InvokeCompleteCommand, (document, range) => {
@@ -217,7 +285,7 @@ export function activate(context: ExtensionContext) {
 	const removeemptymethodscmd = commands.registerCommand(InvokeRemoveEmptyMethodsCommand, invokeRemoveEmptyMethods)
 
 	context.subscriptions.push(removeemptymethodscmd);
-
+	
 
 }
 
