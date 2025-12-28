@@ -136,6 +136,14 @@
 					"default": true,
 					"description": "Workspaces folders will be added to include paths (i.e. -Fi)"
 				},
+				"pascalLanguageServer.initializationOptions.excludeWorkspaceFolders": {
+				  "type": "array",
+				  "items": {
+				    "type": "string"
+				  },
+				  "default": [],
+				  "markdownDescription": "Workspace folder paths to exclude from workspace path collection (e.g., `[\"/path/to/workspace/node_modules\", \"/path/to/workspace/vendor\"]`)"
+				},
 				"pascalLanguageServer.initializationOptions.checkSyntax": {
 					"type": "boolean",
 					"scope": "application",
