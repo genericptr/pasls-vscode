@@ -48,7 +48,12 @@
 			{	
         "command" : "invoke.removeEmptyMethods",
 				"title" : "Remove empty methods from classes in this file"
+		  },
+			{	
+        "command" : "invoke.removeUnusedUnits",
+				"title" : "Remove unused units from the uses clauses in this file"
 		  }
+
 	  ],
 		"keybindings": [
 			{
