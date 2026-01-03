@@ -50,6 +50,9 @@ const InvokeInvertAssignmentCommand = 'invoke.invertAssignment';
 const RemoveEmptyMethodsCommand = 'pasls.removeEmptyMethods'; 
 const InvokeRemoveEmptyMethodsCommand = 'invoke.removeEmptyMethods'; 
 
+const RemoveUnusedUnitsCommand = 'pasls.removeUnusedUnits';
+const InvokeRemoveUnusedUnitsCommand = 'invoke.removeUnusedUnits';
+
 // const InactiveRegionNotification = 'pasls.inactiveRegions';
 const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('pasls.inactiveRegions');
 
@@ -112,6 +115,25 @@ function invokeRemoveEmptyMethods() {
 	}
 }
 
+
+
+function invokeRemoveUnusedUnits() {
+    // Do we have a document ?
+    let activeEditor = window.activeTextEditor;
+    if (!activeEditor) {
+        return;
+    }
+    let doc : TextDocument = activeEditor.document;
+        
+    if (!doc) {
+        window.showErrorMessage('No document available.');
+        return;
+    }
+    let pos : Position = activeEditor.selection.start;
+    if (doc.uri) {
+        commands.executeCommand(RemoveUnusedUnitsCommand, doc.uri.with({ "scheme": "file" }).toString(), pos);
+    }
+}
 
 function invokeInvertAssignment(document: TextDocument, range: Range) {
 	// Do we have a document ?
